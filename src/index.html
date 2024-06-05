@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <title>Minesweeper frame in HTML</title>
+        <link rel="stylesheet" href="style.css">
+        <!-- <script defer src="./modules/file.js"></script> -->
+        <script defer src="./modules/dom-helper.js"></script>
+        <script defer src="index.js"></script>
+        <script defer src="./modules/select-inputs.js"></script>
+    </head>
+
+    <body>
+		<main>
+			<div id="game">
+				<div id="current-game-stats">
+					<div id="mine-count-box">10</div>
+				</div>
+				<div id="field"></div>
+			</div>
+            <label>
+                Field size:
+                <select id="field-select-size" name="field-size">
+                    <option value="small">Small</option>
+                    <option value="medium">Medium</option>
+                    <option value="expert">Expert</option>
+                </select>
+            </label>
+        </main>
+    </body>
+</html>

@@ -1,0 +1,168 @@
+/*  Table of Content (Index)
+        1. Global
+        2. RootContainer
+*/
+
+/*  =======================
+    1. Global
+    ======================= */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+
+    background: #222222;
+    color: black;
+
+    font-size: 16px;
+    text-align: left;
+}
+
+body {
+    width: 100%;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6, p, a, button {
+    margin: 0;
+    padding: 0;
+}
+
+p, a, button {
+    font-size: 1rem;
+    color: black;
+}
+
+/* Links */
+a {
+    text-decoration: none;
+    font: inherit;
+}
+
+/* Buttons */
+button {
+    display: inline-block;
+
+    padding: 0.63em 1.563em;
+
+    border: 1.5px solid black;
+    background: white;
+
+    font: inherit;
+    text-align: center;
+}
+
+/* Inputs */
+input, textarea, select {
+    font: inherit;
+}
+
+/* media */
+img, picture, svg, video {
+    display: block;
+    max-width: 100%;
+}
+
+/*  =======================
+    2. RootContainer
+    ======================= */
+body > main {
+    width: 100%;
+
+    padding: 2rem 1rem 1rem;
+
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+
+    flex-wrap: wrap;
+
+    gap: 2rem;
+}
+
+label {
+    color: #FFFFFF;
+
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+
+    gap: 0.5rem;
+}
+
+select {
+    min-width: 16ch;
+}
+
+#game {
+    border: 5px solid #bebebe;
+    background: #bebebe;
+
+    outline: 2px solid #FFFFFF;
+
+    display: flex;
+    align-items: stretch;
+    justify-content: flex-start;
+    flex-direction: column;
+
+    gap: 10px;
+}
+
+#game > div {
+    min-height: 5rem;
+    min-width: 100px;
+
+    background: inherit;
+    outline: 2px solid #FFFFFF;
+}
+
+#current-game-stats {
+    padding: 0.5rem;
+
+    display: flex;
+    justify-content: flex-end;
+}
+
+#mine-count-box {
+    padding: 0.3rem;
+
+    background: #000000;
+    color: #fa000f;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#field {
+    padding: 0.5rem;
+
+    display: grid;
+    grid-template-columns: repeat(10, 2rem);
+    grid-auto-rows: 2rem;
+
+    grid-gap: 0.3rem;
+}
+
+.cell {
+    outline: 1px solid #FFFFFF;
+
+    -webkit-box-shadow: inset -1px 3px 8px 5px rgba(0, 0, 0, 0.10), 2px 5px 16px 0px #0B325E, 5px 5px 15px 5px rgba(0,0,0,0); 
+    box-shadow: inset -1px 3px 8px 5px rgba(0, 0, 0, 0.10), 2px 5px 16px 0px #0B325E, 5px 5px 15px 5px rgba(0,0,0,0);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mine {
+    width: 30%;
+    height: 30%;
+
+    border-radius: 50%;
+    background: red;
+}
