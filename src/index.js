@@ -2,172 +2,173 @@
 
 // Global constants
 const FIELD_ID_NAME = "field";
+const FIELD_NAME_LIST = [ "small", "intermediate", "expert" ];
 
-const FIELD_SIZES = {
-    small: 10,
-    medium: 15,
-    expert: 30,
+const FIELDS = {
+    small: { name: FIELD_NAME_LIST[0], size: 9, mines: 10},
+    intermediate: { name: FIELD_NAME_LIST[1], size: 16, mines: 40 },
+    expert: { name: FIELD_NAME_LIST[2], size: 22, mines: 99 },
 };
 
-const currentFieldSize = FIELD_SIZES.small;
-const currentCellNumber = currentFieldSize * currentFieldSize;
-const maxNumberOfMines = currentFieldSize;
+let currentField = FIELDS.small;
+let field = [];
+const fieldElement = getElementById(FIELD_ID_NAME);
+let mineCoordsList = [];
 
-const field = Array(currentCellNumber).fill({ numberOfMinesAround: 0 });
+main();
 
-/**
- *
- * @param {object} mineCoordinate
- * @param {number} mineCoordinate.rowIndex
- * @param {number} mineCoordinate.colIndex
- */
-const updateNumberOfMinesAroundMineIndex = mineCoordinate => {
+function main() {
 
-    const cellsToUpdateCoordinates = {
-        top: {
-            rowIndex: mineCoordinate.rowIndex - 1,
-            colIndex: mineCoordinate.colIndex,
-        },
+	renderField();
+	populateLogicField();
+	placeMines();
+	calculateCellsNumberOfMines();
 
-        topRight: {
-            rowIndex: mineCoordinate.rowIndex - 1,
-            colIndex: mineCoordinate.colIndex + 1,
-        },
-
-        right: {
-            rowIndex: mineCoordinate.rowIndex,
-            colIndex: mineCoordinate.colIndex + 1,
-        },
-
-        downRight: {
-            rowIndex: mineCoordinate.rowIndex + 1,
-            colIndex: mineCoordinate.colIndex + 1,
-        },
-
-        down: {
-            rowIndex: mineCoordinate.rowIndex + 1,
-            colIndex: mineCoordinate.colIndex,
-        },
-
-        downLeft: {
-            rowIndex: mineCoordinate.rowIndex + 1,
-            colIndex: mineCoordinate.colIndex - 1,
-        },
-
-        left: {
-            rowIndex: mineCoordinate.rowIndex,
-            colIndex: mineCoordinate.colIndex - 1,
-        },
-
-        topLeft: {
-            rowIndex: mineCoordinate.rowIndex - 1,
-            colIndex: mineCoordinate.colIndex - 1,
-        },
-    };
-
-    const coordinatesToUpdate = Object.values(cellsToUpdateCoordinates);
-
-    coordinatesToUpdate.forEach(coordinate => {
-
-        const flatIndex = calculateFlatIndex(
-            { rowIndex: coordinate.rowIndex, colIndex: coordinate.colIndex }
-        );
-
-        if (flatIndex >= 0 && !field[flatIndex]?.hasMine){
-
-            field[flatIndex] = {
-                ...field[flatIndex],
-                numberOfMinesAround: field[flatIndex]?.numberOfMinesAround + 1,
-            };
-        }
-    });
-};
-
-const renderCells = fieldElement => {
-
-    for (let i=0; i < currentCellNumber; i++) {
-
-        const newCellElement = createElementAndSetClass("cell");
-
-        if (field[i]?.hasMine) {
-
-            const mineElement = createElementAndSetClass("mine");
-            newCellElement.append(mineElement);
-        }
-
-        if (field[i]?.numberOfMinesAround !== 0) {
-            newCellElement.innerHTML = field[i]?.numberOfMinesAround;
-        }
-
-        fieldElement.append(newCellElement);
-    }
-};
-
-const initializeMapField = () => {
-
-    let minesToPlace = maxNumberOfMines;
-
-    while (minesToPlace > 0) {
-
-        const rowIndex = getRandomInt(0, currentFieldSize);
-        const colIndex = getRandomInt(0, currentFieldSize);
-        const mineIndex = calculateFlatIndex({ rowIndex, colIndex });
-
-        if (!field[mineIndex]?.hasMine) {
-
-            field[mineIndex] = {
-                ...field[mineIndex],
-                hasMine: true,
-                numberOfMinesAround: 0
-            };
-
-            updateNumberOfMinesAroundMineIndex({ rowIndex, colIndex });
-            minesToPlace -= 1;
-        }
-    }
-};
-
-const createField = () => {
-
-    const fieldElement = getElementById(FIELD_ID_NAME);
-
-    initializeMapField();
-    renderCells(fieldElement);
-};
-
-const main = () => {
-
-    createField();
+	cheatRenderCellsContent();
 
     // TODO remove this cheat
     console.log(field);
 };
 
-main();
+function renderField() {
 
+	updateFieldRenderSize();
 
-/* UTILS */
+	for (let row=0; row < currentField.size; row++) {
 
-function calculateFlatIndex({ rowIndex, colIndex }) {
+		for (let col=0; col < currentField.size; col++) {
 
-    if (rowIndex < 0 || colIndex < 0 || rowIndex >= currentFieldSize || colIndex >= currentFieldSize) {
-        // TODO what to return?
-        return false;
-    }
+			const cell = createCellElement();
 
-    return rowIndex * currentFieldSize + colIndex;
+			cell.onclick = () => handleCellClick({row, col});
+			appendToElement(fieldElement, cell);
+		}
+	}
 }
 
-/**
- *
- * @param {number} min - included in the generation
- * @param {number} max - excluded in the generation
- * @returns
- */
-function getRandomInt(min, max) {
+function handleCellClick(coord) {
+	// TODO write logic
+	console.log(coord);
+}
 
-    const minCeiled = Math.ceil(min);
-    const maxFloored = Math.floor(max);
+function populateLogicField() {
 
-    return Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled);
+	field = [];
+
+	for (let row=0; row < currentField.size; row++) {
+
+		const rowSupp = [];
+
+		for (let col=0; col < currentField.size; col++) {
+
+			const cell = createCell();
+			rowSupp.push(cell);
+		}
+
+		field.push(rowSupp);
+	}
+}
+
+function placeMines() {
+
+	let minesLeftToPlace = currentField.mines;
+	mineCoordsList = [];
+
+    while (minesLeftToPlace > 0) {
+
+		const mineCoord = {
+			row: getRandomInt(0, currentField.size),
+			col: getRandomInt(0, currentField.size),
+		};
+
+		if (hasCellMine(mineCoord)) {
+			continue;
+		}
+
+		field[mineCoord.row][mineCoord.col].hasMine = true;
+		mineCoordsList.push(mineCoord);
+		minesLeftToPlace -= 1;
+    }
+}
+
+function calculateCellsNumberOfMines() {
+
+	for (const mineCoord of mineCoordsList) {
+		calculateNumberOfMinesAroundCell(mineCoord);
+	}
+}
+
+function calculateNumberOfMinesAroundCell(mineCoordinate) {
+
+    const candidatesOfCoordsCellToUpdate = {
+        top: {
+            row: mineCoordinate.row - 1,
+            col: mineCoordinate.col,
+        },
+
+        topRight: {
+            row: mineCoordinate.row - 1,
+            col: mineCoordinate.col + 1,
+        },
+
+        right: {
+            row: mineCoordinate.row,
+            col: mineCoordinate.col + 1,
+        },
+
+        downRight: {
+            row: mineCoordinate.row + 1,
+            col: mineCoordinate.col + 1,
+        },
+
+        down: {
+            row: mineCoordinate.row + 1,
+            col: mineCoordinate.col,
+        },
+
+        downLeft: {
+            row: mineCoordinate.row + 1,
+            col: mineCoordinate.col - 1,
+        },
+
+        left: {
+            row: mineCoordinate.row,
+            col: mineCoordinate.col - 1,
+        },
+
+        topLeft: {
+            row: mineCoordinate.row - 1,
+            col: mineCoordinate.col - 1,
+        },
+    };
+
+	for (const [_key, coord] of Object.entries(candidatesOfCoordsCellToUpdate)) {
+
+		if (!validateCellCoord(coord) || hasCellMine(coord)) {
+			continue;
+		}
+
+		field[coord.row][coord.col].numberOfMinesAround += 1;
+	}
+}
+
+function cheatRenderCellsContent() {
+
+	const fieldElementChildren = [...fieldElement.childNodes];
+	
+	fieldElementChildren.forEach((cell, index) => {
+
+		const row = Math.floor(index / currentField.size);
+		const col = index % currentField.size;
+
+		if (hasCellMine({ row, col })) {
+
+			const mineElement = createElementAndSetClass("mine");
+			appendToElement(cell, mineElement);
+		}
+
+		if (field[row][col].numberOfMinesAround !== 0) {
+			cell.innerHTML = field[row][col].numberOfMinesAround;
+		}
+	});
 }

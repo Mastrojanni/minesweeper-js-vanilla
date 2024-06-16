@@ -142,10 +142,21 @@ select {
     padding: 0.5rem;
 
     display: grid;
-    grid-template-columns: repeat(10, 2rem);
     grid-auto-rows: 2rem;
-
     grid-gap: 0.3rem;
+}
+
+.small-field {
+	grid-template-columns: repeat(9, 2rem);
+}
+
+.intermediate-field {
+	grid-template-columns: repeat(16, 2rem);
+}
+
+.expert-field {
+	grid-template-columns: repeat(22, 1.5rem);
+	grid-auto-rows: 1.5rem;
 }
 
 .cell {

@@ -1,16 +1,30 @@
 "use strict";
 
 const SELECT_INPUT_ID_NAME = "field-select-size";
+const selectInputElement = getElementById(SELECT_INPUT_ID_NAME);
 
-const initializeAllSelectInput = () => {
+initSelect();
 
-	const changeFieldSizeInputElement = getElementById(SELECT_INPUT_ID_NAME);
+function initSelect() {
 
-	const handleFieldSizeInput = event => {
+	createOptionElements();
+
+	const handleSelectChange = event => {
 		console.log("SELECT", event.target.value);
 	};
 
-	changeFieldSizeInputElement.addEventListener("change", handleFieldSizeInput);
+	selectInputElement.addEventListener("change", handleSelectChange);
 };
 
-initializeAllSelectInput();
+function createOptionElements() {
+
+	for (const fieldName of FIELD_NAME_LIST) {
+
+		const optionElement = createElement("option");
+
+		optionElement.value = fieldName;
+		optionElement.innerText = fieldName.toLowerCase();
+
+		selectInputElement.append(optionElement);
+	}
+}

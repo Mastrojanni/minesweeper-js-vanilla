@@ -1,5 +1,9 @@
 "use strict";
 
+/**
+ * @param {string} idName 
+ * @returns
+ */
 function getElementById(idName) {
 
 	const element = document.getElementById(idName);
@@ -11,6 +15,10 @@ function getElementById(idName) {
 	return element;
 }
 
+/**
+ * @param {string} className 
+ * @returns
+ */
 function createElementAndSetClass(className) {
 
     if (!className?.trim()) {
@@ -18,8 +26,33 @@ function createElementAndSetClass(className) {
     }
 
     const element = document.createElement("div");
-
     element.className = className;
 
     return element;
+}
+
+/**
+ * @param {string} elementName 
+ * @returns
+ */
+function createElement(elementName) {
+	return document.createElement(elementName);
+}
+
+/**
+ * 
+ * @param {HTMLElement} element 
+ * @param {string} newClassName 
+ */
+function setElementClassName(element, newClassName) {
+	element.className = newClassName;
+}
+
+/**
+ * 
+ * @param {HTMLElement} parentElement 
+ * @param {HTMLElement} childElement 
+ */
+function appendToElement(parentElement, childElement) {
+	parentElement?.append(childElement);
 }
