@@ -10,7 +10,11 @@ function initSelect() {
 	createOptionElements();
 
 	const handleSelectChange = event => {
-		console.log("SELECT", event.target.value);
+
+		const fieldName = event.target.value;
+
+		currentField = FIELDS[fieldName];
+		initField();
 	};
 
 	selectInputElement.addEventListener("change", handleSelectChange);

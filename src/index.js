@@ -2,36 +2,80 @@
 
 // Global constants
 const FIELD_ID_NAME = "field";
+
 const FIELD_NAME_LIST = [ "small", "intermediate", "expert" ];
 
 const FIELDS = {
-    small: { name: FIELD_NAME_LIST[0], size: 9, mines: 10},
-    intermediate: { name: FIELD_NAME_LIST[1], size: 16, mines: 40 },
-    expert: { name: FIELD_NAME_LIST[2], size: 22, mines: 99 },
+    small: {
+		name: FIELD_NAME_LIST[0],
+		size: 9,
+		mines: 10
+	},
+    intermediate: {
+		name: FIELD_NAME_LIST[1],
+		size: 16,
+		mines: 40
+	},
+    expert: {
+		name: FIELD_NAME_LIST[2],
+		size: 22,
+		mines: 99
+	},
 };
 
+const fieldElement = getElementById(FIELD_ID_NAME);
 let currentField = FIELDS.small;
 let field = [];
-const fieldElement = getElementById(FIELD_ID_NAME);
 let mineCoordsList = [];
+let isCheatFieldRevealedOn = false;
+let numberOfFlaggedCells = 0;
+let numberOfRevealedCells = 0;
+let isGameOver = false;
+let hasWinTheGame = false;
 
 main();
 
 function main() {
 
-	renderField();
-	populateLogicField();
-	placeMines();
-	calculateCellsNumberOfMines();
+	// assuming the field it's always a grid
 
-	cheatRenderCellsContent();
+	// 1. render field, so cells of cells, no children inside
+		// bind cells with onclick passing coord value
+	// 2. populate field logic matrix
+		// - place mines
+		// - save placed mines index
+		// - update near cells mines with number of mines around ?
+	// 3. on cell click we have coord of clicked cell so:
+		// - if this have mine, game over
+		// - explore algorithm with recursion
+
+	setRightClickHandler(fieldElement, () => {});
+	initField();
 
     // TODO remove this cheat
     console.log(field);
 };
 
+function initField() {
+
+	isCheatFieldRevealedOn = false;
+	numberOfFlaggedCells = 0;
+	numberOfRevealedCells = 0;
+	isGameOver = false;
+	hasWinTheGame = false;
+
+	changeFaceToNeutral();
+
+	renderField();
+	populateLogicField();
+	placeMines();
+	updateMineCounter();
+	calculateCellsNumberOfMines();
+}
+
 function renderField() {
 
+	setInnerHTML(fieldElement, "");
 	updateFieldRenderSize();
 
 	for (let row=0; row < currentField.size; row++) {
@@ -39,16 +83,173 @@ function renderField() {
 		for (let col=0; col < currentField.size; col++) {
 
 			const cell = createCellElement();
+			const coord = { row, col };
 
-			cell.onclick = () => handleCellClick({row, col});
+			bindMouseDownHandler(cell, () => handleCellMouseDown(cell, coord));
+			bindMouseUpHandler(cell, () => handleCellMouseUp(coord));
+
+			bindClickHandler(cell, () => handleCellClick(coord));
+			setRightClickHandler(cell, () => handleCellRightClick(coord));
+
 			appendToElement(fieldElement, cell);
 		}
 	}
 }
 
 function handleCellClick(coord) {
-	// TODO write logic
-	console.log(coord);
+
+	if (isGameOver || isCellFlagged(coord) || isCheatFieldRevealedOn) {
+		return;
+	}
+
+	if (hasCellMine(coord)) {
+		
+		handleGameOver(coord);
+		return;
+	}
+
+	exploreCells(coord);
+	handleVictory();
+}
+
+function exploreCells(coord) {
+
+	const validCellsAround = getCellsAroundOne(coord);
+
+	if (getNumberOfMinesOfCell(coord) === 0 && !isCellRevealed(coord)) {
+
+		revealCell(coord);
+		numberOfRevealedCells += 1;
+
+		for (const nearCoord of validCellsAround) {
+			exploreCells(nearCoord);
+		}
+	}
+
+	if (!isCellRevealed(coord)) {
+
+		numberOfRevealedCells += 1;
+		revealCell(coord);
+	}
+}
+
+function handleGameOver(mineHit) {
+
+	isGameOver = true;
+	
+	const mineHitElement = getRenderedCell(mineHit);
+	
+	changeFaceToCry();
+	addElementClassName(mineHitElement, "mine-hit");
+	revealAllCells();
+
+	alert("MINE! GAME OVER!");
+}
+
+function handleVictory() {
+
+	const numberOfCellsWithoutMines = getTotalCellNumber() - currentField.mines;
+
+	if (numberOfRevealedCells < numberOfCellsWithoutMines) {
+		return;
+	}
+
+	isGameOver = true;
+	hasWinTheGame = true;
+	changeFaceToVomit();
+	revealAllCells();
+
+	alert("Victory!");
+}
+
+function revealAllCells () {
+
+	for (let row=0; row < currentField.size; row++) {
+
+		for (let col=0; col < currentField.size; col++) {
+
+			const coord = { row, col };
+			revealCell(coord);
+		}
+	}
+}
+
+function revealCell(coord) {
+
+	if (!validateCellCoord(coord)) {
+		return;
+	}
+
+	const cell = getRenderedCell(coord);
+
+	changeCellClassToReveal(cell);
+	setCellRevealed(coord, true);
+	renderCellContent(cell, coord);
+}
+
+// TODO refactor
+function handleCellRightClick(coord) {
+
+	const cell = getRenderedCell(coord);
+
+	if (isGameOver || isCheatFieldRevealedOn || isCellRevealed(coord)) {
+		return;
+	}
+
+	toggleCellIsFlagged(coord);
+
+	if (numberOfFlaggedCells >= currentField.mines && isCellFlagged(coord)) {
+
+		// aka revert
+		toggleCellIsFlagged(coord);
+		return;
+	}
+
+	changeFaceToStupid();
+	setTimeout(changeFaceToNeutral, 500);
+
+	if (isCellFlagged(coord)) {
+
+		const flagElement = createFlagElement();
+
+		appendToElement(cell, flagElement);
+		numberOfFlaggedCells += 1;
+		updateMineCounter();
+
+		return;
+	}
+
+	setInnerHTML(cell, "");
+	numberOfFlaggedCells -= 1;
+	updateMineCounter();
+}
+
+function handleCellMouseDown(cell, coord) {
+
+	if (isCellRevealed(coord) || isCellFlagged(coord)) {
+		return;
+	}
+
+	// TODO refactor?
+	bindMouseLeaveHandler(cell, () => {
+
+		if (!isGameOver) {
+			changeFaceToNeutral();
+		}
+
+		bindMouseLeaveHandler(cell, undefined);
+	});
+
+	changeFaceToHappy();
+}
+
+function handleCellMouseUp(coord) {
+
+	if (isGameOver || isCellRevealed(coord) || isCellFlagged(coord)) {
+		return;
+	}
+
+	changeFaceToNeutral();
 }
 
 function populateLogicField() {
@@ -72,6 +273,7 @@ function populateLogicField() {
 function placeMines() {
 
 	let minesLeftToPlace = currentField.mines;
+
 	mineCoordsList = [];
 
     while (minesLeftToPlace > 0) {
@@ -85,7 +287,7 @@ function placeMines() {
 			continue;
 		}
 
-		field[mineCoord.row][mineCoord.col].hasMine = true;
+		setCellMineFlag(mineCoord, true);
 		mineCoordsList.push(mineCoord);
 		minesLeftToPlace -= 1;
     }
@@ -100,75 +302,14 @@ function calculateCellsNumberOfMines() {
 
 function calculateNumberOfMinesAroundCell(mineCoordinate) {
 
-    const candidatesOfCoordsCellToUpdate = {
-        top: {
-            row: mineCoordinate.row - 1,
-            col: mineCoordinate.col,
-        },
-
-        topRight: {
-            row: mineCoordinate.row - 1,
-            col: mineCoordinate.col + 1,
-        },
-
-        right: {
-            row: mineCoordinate.row,
-            col: mineCoordinate.col + 1,
-        },
-
-        downRight: {
-            row: mineCoordinate.row + 1,
-            col: mineCoordinate.col + 1,
-        },
-
-        down: {
-            row: mineCoordinate.row + 1,
-            col: mineCoordinate.col,
-        },
-
-        downLeft: {
-            row: mineCoordinate.row + 1,
-            col: mineCoordinate.col - 1,
-        },
-
-        left: {
-            row: mineCoordinate.row,
-            col: mineCoordinate.col - 1,
-        },
-
-        topLeft: {
-            row: mineCoordinate.row - 1,
-            col: mineCoordinate.col - 1,
-        },
-    };
+    const candidatesOfCoordsCellToUpdate = getCellsAroundOne(mineCoordinate);
 
 	for (const [_key, coord] of Object.entries(candidatesOfCoordsCellToUpdate)) {
 
-		if (!validateCellCoord(coord) || hasCellMine(coord)) {
+		if (hasCellMine(coord)) {
 			continue;
 		}
 
-		field[coord.row][coord.col].numberOfMinesAround += 1;
+		addOneToNumberOfMinesAroundOfCell(coord);
 	}
-}
-
-function cheatRenderCellsContent() {
-
-	const fieldElementChildren = [...fieldElement.childNodes];
-	
-	fieldElementChildren.forEach((cell, index) => {
-
-		const row = Math.floor(index / currentField.size);
-		const col = index % currentField.size;
-
-		if (hasCellMine({ row, col })) {
-
-			const mineElement = createElementAndSetClass("mine");
-			appendToElement(cell, mineElement);
-		}
-
-		if (field[row][col].numberOfMinesAround !== 0) {
-			cell.innerHTML = field[row][col].numberOfMinesAround;
-		}
-	});
 }

@@ -15,9 +15,12 @@ html, body {
     padding: 0;
 
     background: #222222;
-    color: black;
+    color: #FFFFFF;
 
+    font-family: "Tiny5", sans-serif;
     font-size: 16px;
+    font-weight: 600;
+    line-height: 1.5;
     text-align: left;
 }
 
@@ -84,8 +87,6 @@ body > main {
 }
 
 label {
-    color: #FFFFFF;
-
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -96,6 +97,16 @@ label {
 
 select {
     min-width: 16ch;
+}
+
+.visually-hidden {
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    height: 1px;
+    overflow: hidden;
+    position: absolute;
+    white-space: nowrap;
+    width: 1px;
 }
 
 #game {
@@ -111,7 +122,6 @@ select {
 
     gap: 10px;
 }
-
 #game > div {
     min-height: 5rem;
     min-width: 100px;
@@ -124,7 +134,10 @@ select {
     padding: 0.5rem;
 
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
+}
+#current-game-stats > div {
+    flex-basis: 4rem;
 }
 
 #mine-count-box {
@@ -145,35 +158,64 @@ select {
     grid-auto-rows: 2rem;
     grid-gap: 0.3rem;
 }
-
-.small-field {
+#field.small-field {
 	grid-template-columns: repeat(9, 2rem);
 }
-
-.intermediate-field {
+#field.intermediate-field {
 	grid-template-columns: repeat(16, 2rem);
 }
-
-.expert-field {
+#field.expert-field {
 	grid-template-columns: repeat(22, 1.5rem);
 	grid-auto-rows: 1.5rem;
 }
 
 .cell {
-    outline: 1px solid #FFFFFF;
+    padding: 0.2rem;
 
-    -webkit-box-shadow: inset -1px 3px 8px 5px rgba(0, 0, 0, 0.10), 2px 5px 16px 0px #0B325E, 5px 5px 15px 5px rgba(0,0,0,0); 
-    box-shadow: inset -1px 3px 8px 5px rgba(0, 0, 0, 0.10), 2px 5px 16px 0px #0B325E, 5px 5px 15px 5px rgba(0,0,0,0);
+    border: 1px solid;
+    border-top-color: #FFFFFF;
+    border-left-color: #FFFFFF;
 
     display: flex;
     align-items: center;
     justify-content: center;
 }
+.cell.revealed {
+    border-color: #808080;
+}
+.cell.mine-hit {
+    outline: 2px solid #000000;
+    background: #FFFFFF;
+}
 
-.mine {
-    width: 30%;
-    height: 30%;
+.color-blue {
+    color: #0000ff;
+}
+.color-green {
+    color: #008200;
+}
+.color-red {
+    color: #fe0000;
+}
+.color-dark-blue {
+    color: #000084;
+}
+.color-dark-red {
+    color: #840000;
+}
+.color-light-blue {
+    color: #008284;
+}
+.color-purple {
+    color: #840084;
+}
+.color-grey {
+    color: #757575;
+}
 
-    border-radius: 50%;
-    background: red;
+.col {
+    display: flex;
+    flex-direction: column;
+
+    gap: 1.5rem;
 }
