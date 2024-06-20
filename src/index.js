@@ -31,7 +31,11 @@ let isCheatFieldRevealedOn = false;
 let numberOfFlaggedCells = 0;
 let numberOfRevealedCells = 0;
 let isGameOver = false;
-let hasWinTheGame = false;
+let hasWonTheGame = false;
+let hasGameStarted = false;
+let secondsElapsedFromGameStart = 0;
+let timerIntervalID;
+let canChangeFace = true;
 
 main();
 
@@ -51,9 +55,6 @@ function main() {
 
 	setRightClickHandler(fieldElement, () => {});
 	initField();
-
-    // TODO remove this cheat
-    console.log(field);
 };
 
 function initField() {
@@ -62,14 +63,21 @@ function initField() {
 	numberOfFlaggedCells = 0;
 	numberOfRevealedCells = 0;
 	isGameOver = false;
-	hasWinTheGame = false;
+	hasWonTheGame = false;
+	hasGameStarted = false;
+	secondsElapsedFromGameStart = 0;
+	canChangeFace = true;
+
+	clearInterval(timerIntervalID);
 
 	changeFaceToNeutral();
 
 	renderField();
 	populateLogicField();
 	placeMines();
+	initOutputBoxes();
 	updateMineCounter();
+	updateTimerBoxTimer();
 	calculateCellsNumberOfMines();
 }
 
@@ -109,6 +117,7 @@ function handleCellClick(coord) {
 	}
 
 	exploreCells(coord);
+	startTimer();
 	handleVictory();
 }
 
@@ -136,9 +145,12 @@ function exploreCells(coord) {
 function handleGameOver(mineHit) {
 
 	isGameOver = true;
+	canChangeFace = true;
 	
 	const mineHitElement = getRenderedCell(mineHit);
-	
+
+	clearInterval(timerIntervalID);
+	allowToSetFaces();
 	changeFaceToCry();
 	addElementClassName(mineHitElement, "mine-hit");
 	revealAllCells();
@@ -154,8 +166,10 @@ function handleVictory() {
 		return;
 	}
 
+	clearInterval(timerIntervalID);
 	isGameOver = true;
-	hasWinTheGame = true;
+	hasWonTheGame = true;
+	allowToSetFaces();
 	changeFaceToVomit();
 	revealAllCells();
 
@@ -205,6 +219,7 @@ function handleCellRightClick(coord) {
 		return;
 	}
 
+	startTimer();
 	changeFaceToStupid();
 	setTimeout(changeFaceToNeutral, 500);
 
@@ -222,6 +237,16 @@ function handleCellRightClick(coord) {
 	setInnerHTML(cell, "");
 	numberOfFlaggedCells -= 1;
 	updateMineCounter();
+}
+
+function startTimer() {
+
+	if (hasGameStarted) {
+		return;
+	}
+
+	hasGameStarted = true;
+	timerIntervalID = setInterval(updateTimerTick, 1000);
 }
 
 function handleCellMouseDown(cell, coord) {

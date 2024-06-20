@@ -140,7 +140,8 @@ select {
     flex-basis: 4rem;
 }
 
-#mine-count-box {
+.stat-number-box {
+
     padding: 0.3rem;
 
     background: #000000;
@@ -149,6 +150,13 @@ select {
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.stat-number-box > div {
+
+    font-size: 1.5rem;
+    transform: scale(150%, 300%);
+    line-height: 1;
 }
 
 #field {

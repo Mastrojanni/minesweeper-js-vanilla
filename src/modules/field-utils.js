@@ -50,7 +50,7 @@ function renderCellContent(cell, coord) {
 		return;
 	}
 
-	if (hasCellMine(coord) && isGameOver && !hasWinTheGame) {
+	if (hasCellMine(coord) && isGameOver && !hasWonTheGame) {
 
 		const explodedMineElement = createExplodedMineElement();
 		appendToElement(cell, explodedMineElement);
